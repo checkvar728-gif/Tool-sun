@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PYOCSS22 - CYBER PREDICTOR v4.0</title>
+    <style>
+        :root {
+            --bg: #050509;
+            --panel-bg: rgba(13, 13, 25, 0.7);
+            --primary: #00f2fe; /* Cyan cho Xỉu */
+            --secondary: #ff0055; /* Pink cho Tài */
+            --accent: #ffe600; /* Yellow cho thông số */
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --win: #00ff88;
+            --lose: #ff3333;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(0, 242, 254, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(255, 0, 85, 0.08) 0px, transparent 50%);
+            color: var(--text);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            letter-spacing: 0.5px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        /* Giao diện kính mờ */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: beam 3s infinite;
+        }
+
+        @keyframes beam { 100% { left: 100%; } }
+
+        /* Header */
+        .header-panel {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-image: linear-gradient(to right, var(--primary), var(--secondary)) 1;
+            border-width: 0 0 2px 0;
+            border-style: solid;
+            padding-bottom: 15px;
+        }
+
+        .brand-title {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .status-bar {
+            font-size: 0.8rem;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            height: 8px; width: 8px;
+            background-color: var(--win);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--win);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse { 50% { opacity: 0.5; transform: scale(0.8); } }
+
+        /* Nút âm thanh */
+        .btn-cyber {
+            background: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+        .btn-cyber:hover {
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 0 15px var(--secondary);
+        }
+        .btn-cyber.active {
+            background: #333;
+            border-color: #555;
+            color: #888;
+        }
+
+        /* Khu vực dự đoán */
+        .prediction-zone {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .big-prediction {
+            font-size: 5rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+
+        .metric-group {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        .metric-item b { color: var(--accent); font-size: 1.2rem; }
+        .metric-item span { color: #888; font-size: 0.75rem; }
+
+        /* Lịch sử dự đoán (NEW) */
+        .history-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding-right: 5px;
+        }
+
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-size: 0.8rem;
+        }
+        .hist-phien { color: #888; }
+        .hist-ai { font-weight: 700; }
+        .hist-real { color: #ccc; }
+        .hist-res {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.7rem;
+        }
+        .res-win { background: rgba(0, 255, 136, 0.15); color: var(--win); border: 1px solid var(--win); }
+        .res-lose { background: rgba(255, 51, 51, 0.15); color: var(--lose); border: 1px solid var(--lose); }
+
+        /* Nhật ký */
+        .log-panel {
+            grid-column: span 2;
+            height: 100px;
+            font-size: 0.75rem;
+            color: #aaa;
+            overflow-y: auto;
+            border-color: rgba(0, 242, 254, 0.1);
+        }
+        .log-item { margin-bottom: 4px; font-family: monospace; }
+        .log-time { color: var(--primary); }
+
+        /* Hiệu ứng báo phiên mới */
+        @keyframes border-flash {
+            0% { border-color: #bc00ff; box-shadow: 0 0 20px #bc00ff; }
+            100% { border-color: var(--border); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
+        }
+        .new-session-alert {
+            animation: border-flash 0.5s ease 4;
+        }
+
+        /* Mobile */
+        @media (max-width: 800px) {
+            .main-container { grid-template-columns: 1fr; }
+            .header-panel, .log-panel { grid-column: span 1; }
+            .prediction-zone { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="glass-panel header-panel">
+        <div class="brand-title">PYOCSS22 v4.0</div>
+        <div class="status-bar">
+            <span class="status-dot"></span>
+            <span id="system-time">CONNECTED</span>
+            <button class="btn-cyber" id="audioBtn">BẬT BÁO ĐỘNG</button>
+        </div>
+    </div>
+
+    <div class="prediction-zone">
+        <div class="glass-panel" id="predict-panel">
+            <span class="panel-label">DỰ ĐOÁN PHIÊN <span id="phien_next" style="color:white; font-family:monospace">...</span></span>
+            <div class="big-prediction" id="predict_val">WAIT</div>
+            
+            <div class="metric-group">
+                <div class="metric-item"><b id="confidence">--</b><br><span>TIN CẬY</span></div>
+                <div class="metric-item"><b id="winrate">--%</b><br><span>TỶ LỆ THẮNG</span></div>
+            </div>
+        </div>
+
+        <div class="glass-panel">
+            <span class="panel-label">THỐNG KÊ PHIÊN HIỆN TẠI</span>
+            <div class="metric-group" style="border:none; margin:0; padding:0; justify-content: space-around;">
+                <div class="metric-item" style="color:var(--secondary)"><b>TÀI</b><br><span id="count_t" style="font-size:1.5rem; color:var(--secondary)">0</span></div>
+                <div class="metric-item" style="color:var(--primary)"><b>XỈU</b><br><span id="count_x" style="font-size:1.5rem; color:var(--primary)">0</span></div>
+            </div>
+            <div class="metric-group" style="margin-top:10px; font-size:0.8rem">
+                <div>PHIÊN: <span id="phien_now" style="color:white; font-family:monospace">...</span></div>
+                <div>KẾT QUẢ: <span id="ket_qua_now" style="color:white; font-weight:700">...</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-panel history-panel">
+        <span class="panel-label">LỊCH SỬ DỰ ĐOÁN (10 PHIÊN GẦN NHẤT)</span>
+        <div class="history-list" id="history-list">
+            <div class="history-item" style="justify-content: center; color:#555">Chưa có dữ liệu...</div>
+        </div>
+    </div>
+
+    <div class="glass-panel log-panel" id="log-screen">
+        <div class="log-item">[SYS] SYSTEM INITIALIZED. WAITING FOR DATA ACCESS...</div>
+    </div>
+</div>
+
+<script>
+    const API = 'https://sunlaymaynkx.hacksieucap.pro/ttsunver2';
+    let lastPhien = null;
+    let currentAIDetection = null; // Lưu dự đoán của AI cho phiên sắp tới
+    let audioReady = false;
+    let predictionHistory = []; // Mảng lưu lịch sử
+
+    // Request Notification permission
+    if (Notification.permission !== "granted") Notification.requestPermission();
+
+    document.getElementById('audioBtn').addEventListener('click', function() {
+        audioReady = true;
+        this.innerText = "BÁO ĐỘNG: ON";
+        this.classList.add('active');
+        addLog("AUDIO ALERTS ACTIVATED.");
+    });
+
+    function addLog(msg) {
+        const log = document.getElementById('log-screen');
+        log.innerHTML += `<div class="log-item"><span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${msg}</div>`;
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function playAlertSound() {
+        if (!audioReady) return;
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, context.currentTime);
+        gain.gain.setValueAtTime(0.1, context.currentTime);
+        osc.connect(gain);
+        gain.connect(context.destination);
+        osc.start();
+        osc.stop(context.currentTime + 0.2);
+    }
+
+    // Cập nhật bảng lịch sử (NEW)
+    function updateHistoryUI() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = ''; // Clear cũ
+
+        if (predictionHistory.length === 0) {
+            list.innerHTML = '<div class="history-item" style="justify-content: center; color:#555">Đang thu thập dữ liệu...</div>';
+            return;
+        }
+
+        // Hiển thị 10 phiên gần nhất, phiên mới nhất lên đầu
+        predictionHistory.slice().reverse().slice(0, 10).forEach(item => {
+            const resultClass = item.result === 'THẮNG' ? 'res-win' : 'res-lose';
+            const aiColor = item.aiPredict === 'Tài' ? 'var(--secondary)' : 'var(--primary)';
+            
+            list.innerHTML += `
+                <div class="history-item">
+                    <span class="hist-phien">${item.phien}</span>
+                    <span class="hist-ai" style="color:${aiColor}">${item.aiPredict}</span>
+                    <span class="hist-real">${item.realResult}</span>
+                    <span class="hist-res ${resultClass}">${item.result}</span>
+                </div>
+            `;
+        });
+    }
+
+    async function update() {
+        try {
+            const res = await fetch(API);
+            const data = await res.json();
+            
+            // 1. Xử lý logic Lịch Sử Thắng/Thua khi có phiên mới
+            if (lastPhien !== null && data.phien !== lastPhien) {
+                // Kiểm tra xem ta có lưu dự đoán của AI cho phiên vừa kết thúc này không
+                if (currentAIDetection && currentAIDetection.phien_dudoan === data.phien) {
+                    const realResult = data.ket_qua_hien_tai;
+                    const aiPredict = currentAIDetection.du_doan;
+                    const resultStatus = (realResult === aiPredict) ? 'THẮNG' : 'THUA';
+                    
+                    // Thêm vào mảng lịch sử
+                    predictionHistory.push({
+                        phien: data.phien,
+                        aiPredict: aiPredict,
+                        realResult: realResult,
+                        result: resultStatus
+                    });
+                    
+                    updateHistoryUI(); // Cập nhật giao diện lịch sử
+                    addLog(`SESSION ${data.phien} ENDED. AI: ${aiPredict} | REAL: ${realResult} -> ${resultStatus}`);
+                }
+
+                // Hiệu ứng báo phiên mới
+                playAlertSound();
+                document.getElementById('predict-panel').classList.add('new-session-alert');
+                setTimeout(() => document.getElementById('predict-panel').classList.remove('new-session-alert'), 2000);
+                
+                // Notification
+                if (Notification.permission === "granted") {
+                    new Notification("PYOCSS22: PHIÊN MỚI!", {
+                        body: `Kèo tiếp theo: ${data.du_doan_van_sau} (${data.ty_le_thanh_cong})`,
+                    });
+                }
+            }
+
+            // 2. Cập nhật dữ liệu UI chính
+            document.getElementById('phien_now').innerText = data.phien;
+            document.getElementById('phien_next').innerText = data.phien_dudoan;
+            document.getElementById('ket_qua_now').innerText = data.ket_qua_hien_tai;
+            document.getElementById('predict_val').innerText = data.du_doan_van_sau;
+            document.getElementById('confidence').innerText = data.do_tin_cay;
+            document.getElementById('winrate').innerText = data.ty_le_thanh_cong;
+            document.getElementById('count_t').innerText = data.thong_ke.so_lan_Tai;
+            document.getElementById('count_x').innerText = data.thong_ke.so_lan_Xiu;
+
+            // Đổi màu Neon theo kết quả dự đoán
+            const predictColor = data.du_doan_van_sau === "Tài" ? "var(--secondary)" : "var(--primary)";
+            document.getElementById('predict_val').style.color = predictColor;
+            document.getElementById('predict_val').style.textShadow = `0 0 30px ${predictColor}, 0 0 10px ${predictColor}`;
+
+            // 3. Lưu dự đoán hiện tại của AI để so sánh ở phiên sau
+            currentAIDetection = {
+                phien_dudoan: data.phien_dudoan,
+                du_doan: data.du_doan_van_sau
+            };
+            
+            lastPhien = data.phien;
+
+        } catch (e) {
+            console.log("ERR: API CONNECTION FAILED.");
+        }
+    }
+
+    // Đồng hồ hệ thống
+    setInterval(() => {
+        document.getElementById('system-time').innerText = `ACTIVE | ${new Date().toLocaleTimeString()}`;
+    }, 1000);
+
+    // Quét mỗi 5 giây
+    setInterval(update, 5000);
+    update(); // Chạy lần đầu
+    updateHistoryUI(); // Show "Đang thu thập..." lần đầu
+</script>
+
+</body>
+</html>
